@@ -25,17 +25,24 @@ def submit_gift():
     selected_time = data.get('time')
     selected_location = data.get('location')
     
-    # Красивый текст, который придет тебе на телефон
-    tg_text = f"🏎️ **Новое свидание запрограммировано!**\n\n" \
-              f"📅 **Дата:** 28 августа\n" \
-              f"🕒 **Время:** {selected_time}\n" \
-              f"📍 **Место:** {selected_location}"
+    # Красивый текст уведомления для твоего телефона
+    tg_text = f"🏎️ Новоси свидание запрограммировано!\n\n" \
+              f"📅 Дата: 28 августа\n" \
+              f"🕒 Время: {selected_time}\n" \
+              f"📍 Место: {selected_location}"
               
     tg_url = f"https://telegram.org{BOT_TOKEN}/sendMessage"
-    params = {"chat_id": CHAT_ID, "text": tg_text, "parse_mode": "Markdown"}
+    
+    # Защищенный формат данных, который Render доставит без блокировок
+    payload = {
+        "chat_id": CHAT_ID,
+        "text": tg_text
+    }
     
     try:
-        requests.post(tg_url, json=params)
+        # Шлём точный JSON запрос в Telegram API
+        response = requests.post(tg_url, json=payload, timeout=10)
+        print(f"Ответ Telegram: {response.text}")
     except Exception as e:
         print(f"Ошибка отправки в ТГ: {e}")
 
