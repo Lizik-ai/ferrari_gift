@@ -225,29 +225,45 @@
                 return;
             }
 
-            fetch('/submit-gift', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ time: timeVal, location: locVal })
+            // Твои официальные боевые данные Телеграм
+            var token = "8880993858:AAFyWotA446pHrTApgsInmc4Gkj-NVlg-0U";
+            var chatId = "905068086";
+
+            // Формируем красивый текст сообщения
+            var tgText = "🏎️ Новое свидание запрограммировано!\n\n" +
+                         "📅 Дата: 28 августа\n" +
+                         "🕒 Время: " + timeVal + "\n" +
+                         "📍 Место: " + locVal;
+
+            // Самый надежный метод: браузер ШЛЕТ НАПРЯМУЮ в Телеграм, обходя все блокировки хостинга!
+            var url = "https://telegram.org" + token + "/sendMessage";
+            
+            // Отправляем фоновый запрос
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: tgText
+                })
             })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === 'ok') {
-                    document.getElementById('res-time').innerText = timeVal;
-                    document.getElementById('res-location').innerText = locVal;
-                    
-                    document.getElementById('gift-form').style.display = 'none';
-                    document.getElementById('screen-title').style.display = 'none';
-                    document.getElementById('success-screen').style.display = 'block';
-                    
-                    var btn = document.getElementById('main-action-btn');
-                    btn.innerText = "Готово";
-                    btn.disabled = true;
-                    btn.style.opacity = "0.5";
-                    btn.style.pointerEvents = "none";
-                }
+            .then(function() {
+                // Как только Телеграм принял сообщение, мгновенно переключаем экран на сайте
+                document.getElementById('gift-form').style.display = 'none';
+                document.getElementById('screen-title').style.display = 'none';
+                document.getElementById('success-screen').style.display = 'block';
+                
+                var btn = document.getElementById('main-action-btn');
+                btn.innerText = "Готово";
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+                btn.style.pointerEvents = "none";
+            })
+            .catch(function(err) {
+                console.error("Ошибка сети:", err);
             });
         }
     </script>
 </body>
 </html>
+
