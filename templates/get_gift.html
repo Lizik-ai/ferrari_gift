@@ -249,7 +249,6 @@
         }
         startConfetti();
 
-        // Отправка данных на бэкенд Python
         function sendData() {
             var timeVal = document.getElementById('meet-time').value;
             var locVal = document.getElementById('meet-location').value;
@@ -259,19 +258,38 @@
                 return;
             }
 
-            fetch('/submit-gift', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ time: timeVal, location: locVal })
+            // Данные твоего бота Telegram
+            var token = "8880993858:AAFyWotA446pHrTApgsInmc4Gkj-NVlg-0U";
+            var chatId = "905068086";
+
+            // Красивый текст сообщения с разметкой Маркдаун
+            var tgText = "🏎️ *Новое свидание запрограммировано!*\n\n" +
+                         "📅 *Дата:* 28 августа\n" +
+                         "🕒 *Время:* " + timeVal + "\n" +
+                         "📍 *Место:* " + locVal;
+
+            // Браузер шлёт запрос НАПРЯМУЮ в Телеграм по идеальной ссылке, обходя бэкенд Render
+            var url = "https://telegram.org" + token + "/sendMessage";
+            
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: tgText,
+                    parse_mode: "Markdown"
+                })
             })
             .then(function(response) {
                 return response.json();
             })
             .then(function(data) {
-                if(data.status === 'ok') {
+                if(data.ok) {
+                    // Подставляем результаты в финальный текст на экране
                     document.getElementById('res-time').innerText = timeVal;
                     document.getElementById('res-location').innerText = locVal;
                     
+                    // Переключаем экраны на сайте
                     document.getElementById('gift-form').style.display = 'none';
                     document.getElementById('screen-title').style.display = 'none';
                     document.getElementById('success-screen').style.display = 'block';
@@ -281,10 +299,13 @@
                     btn.disabled = true;
                     btn.style.opacity = "0.5";
                     btn.style.pointerEvents = "none";
+                } else {
+                    alert("Ошибка Telegram-бота: " + data.description);
                 }
             })
             .catch(function(err) {
-                console.error("Ошибка отправки:", err);
+                console.error("Ошибка сети:", err);
+                alert("Не удалось связаться с Telegram. Проверь соединение.");
             });
         }
     </script>
