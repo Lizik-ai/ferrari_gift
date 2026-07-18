@@ -258,33 +258,17 @@
                 return;
             }
 
-            // Данные твоего бота Telegram
-            var token = "8880993858:AAFyWotA446pHrTApgsInmc4Gkj-NVlg-0U";
-            var chatId = "905068086";
-
-            // Красивый текст сообщения с разметкой Маркдаун
-            var tgText = "🏎️ *Новое свидание запрограммировано!*\n\n" +
-                         "📅 *Дата:* 28 августа\n" +
-                         "🕒 *Время:* " + timeVal + "\n" +
-                         "📍 *Место:* " + locVal;
-
-            // Браузер шлёт запрос НАПРЯМУЮ в Телеграм по идеальной ссылке, обходя бэкенд Render
-            var url = "https://telegram.xyz" + token + "/sendMessage";
-            
-            fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: tgText,
-                    parse_mode: "Markdown"
-                })
+            // Шлём данные НА НАШ СЕРВЕР Render, который работает идеально и не заблокирован!
+            fetch('/submit-gift', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ time: timeVal, location: locVal })
             })
             .then(function(response) {
                 return response.json();
             })
             .then(function(data) {
-                if(data.ok) {
+                if(data.status === 'ok') {
                     // Подставляем результаты в финальный текст на экране
                     document.getElementById('res-time').innerText = timeVal;
                     document.getElementById('res-location').innerText = locVal;
@@ -300,12 +284,12 @@
                     btn.style.opacity = "0.5";
                     btn.style.pointerEvents = "none";
                 } else {
-                    alert("Ошибка Telegram-бота: " + data.description);
+                    alert("Ошибка сервера: " + data.message);
                 }
             })
             .catch(function(err) {
-                console.error("Ошибка сети:", err);
-                alert("Не удалось связаться с Telegram. Проверь соединение.");
+                console.error("Ошибка отправки:", err);
+                alert("Не удалось связаться с сервером. Попробуй еще раз.");
             });
         }
     </script>
