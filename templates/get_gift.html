@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Забрать подарок</title>
+    <!-- Подключаем премиальный шрифт -->
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
         body {
@@ -22,7 +23,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transform: scale(calc(100vh / 880)); 
+            transform: scale(calc(100vh / 870)); 
             transform-origin: center;
         }
 
@@ -39,6 +40,22 @@
             image-rendering: crisp-edges;
         }
 
+        /* Плавные кружащиеся конфетти на весь экран */
+        @keyframes snowfall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(850px) rotate(360deg); opacity: 0; }
+        }
+        .confetti-particle {
+            position: absolute;
+            background-color: #e5c158; 
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9;
+            animation: snowfall linear infinite;
+        }
+
         .title-header {
             position: absolute;
             top: 150px;
@@ -48,6 +65,7 @@
             font-size: 16px;
             letter-spacing: 2px;
             text-transform: uppercase;
+            font-weight: 500;
         }
 
         .form-container {
@@ -59,6 +77,7 @@
             flex-direction: column;
             gap: 20px;
             box-sizing: border-box;
+            z-index: 15;
         }
 
         .input-group {
@@ -73,10 +92,11 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             padding-left: 5px;
+            font-weight: 500;
         }
 
         .digital-box {
-            background: rgba(20, 20, 20, 0.7);
+            background: rgba(20, 20, 20, 0.75);
             border: 1px solid rgba(229, 193, 88, 0.3);
             border-radius: 15px;
             padding: 12px 15px;
@@ -104,6 +124,7 @@
             pointer-events: none;
         }
 
+        /* Контейнер кнопок */
         .buttons-container {
             position: absolute;
             bottom: 120px;
@@ -111,6 +132,7 @@
             width: 340px;
             display: flex;
             justify-content: space-between;
+            z-index: 20;
         }
 
         .gold-btn {
@@ -131,6 +153,7 @@
             text-decoration: none;
             box-sizing: border-box;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
         .gold-btn.dark {
             background: rgba(229, 193, 88, 0.1);
@@ -155,31 +178,21 @@
             display: none;
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
             box-sizing: border-box;
+            z-index: 15;
         }
-        .success-block h3 {
-            color: #e5c158;
-            margin-top: 0;
-            font-size: 16px;
-            letter-spacing: 1px;
-        }
-        .success-block p {
-            font-size: 14px;
-            margin: 12px 0;
-            color: #cccccc;
-        }
-        .success-block span {
-            color: #e5c158;
-            font-weight: 500;
-        }
+        .success-block h3 { color: #e5c158; margin-top: 0; font-size: 16px; letter-spacing: 1px; }
+        .success-block p { font-size: 14px; margin: 12px 0; color: #cccccc; }
+        .success-block span { color: #e5c158; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <div class="phone-scaler">
-        <div class="phone-container">
+        <div class="phone-container" id="main-stage">
 
             <div class="title-header" id="screen-title">Настройка встречи</div>
 
+            <!-- Цифровая форма ввода -->
             <div class="form-container" id="gift-form">
                 <div class="input-group">
                     <div class="input-label">Дата встречи:</div>
@@ -199,6 +212,7 @@
                 </div>
             </div>
 
+            <!-- Окно успешного подтверждения -->
             <div class="success-block" id="success-screen">
                 <h3>[ ПОДТВЕРЖДЕНО ]</h3>
                 <p>Дата: <span>28 августа</span></p>
@@ -207,6 +221,7 @@
                 <p style="color: #e5c158; margin-top: 20px; font-style: italic; font-size: 12px;">Данные успешно отправлены Лизе. До встречи! ❤️</p>
             </div>
 
+            <!-- Нижняя панель кнопок (Кнопка Ссылка "/" ведет на главную железно!) -->
             <div class="buttons-container">
                 <button class="gold-btn dark" id="main-action-btn" onclick="sendData()">Подтвердить</button>
                 <a href="/" class="gold-btn">на главную</a>
@@ -214,7 +229,27 @@
 
         </div>
     </div>
+
     <script>
+        // Генерация вечного золотого конфетти на этом экране
+        function startConfetti() {
+            var stage = document.getElementById('main-stage');
+            setInterval(function() {
+                var p = document.createElement('div');
+                p.className = 'confetti-particle';
+                var size = Math.random() * 4 + 4;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.left = (Math.random() * 380) + 'px';
+                p.style.top = '-10px';
+                p.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                stage.appendChild(p);
+                setTimeout(function() { p.remove(); }, 8000);
+            }, 200);
+        }
+        startConfetti();
+
+        // Отправка данных на бэкенд Python
         function sendData() {
             var timeVal = document.getElementById('meet-time').value;
             var locVal = document.getElementById('meet-location').value;
@@ -224,37 +259,19 @@
                 return;
             }
 
-            // Данные Telegram для отправки напрямую из браузера
-            var token = "8880993858:AAFyWotA446pHrTApgsInmc4Gkj-NVlg-0U";
-            var chatId = "905068086";
-
-            // Формируем текст сообщения
-            var tgText = "🏎️ Новое свидание запрограммировано!\n\n" +
-                         "📅 Дата: 28 августа\n" +
-                         "🕒 Время: " + timeVal + "\n" +
-                         "📍 Место: " + locVal;
-
-            // Браузер отправляет запрос НАПРЯМУЮ в Телеграм, минуя бэкенд хостинга
-            var url = "https://telegram.org" + token + "/sendMessage";
-            
-            fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: tgText
-                })
+            fetch('/submit-gift', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ time: timeVal, location: locVal })
             })
             .then(function(response) {
                 return response.json();
             })
             .then(function(data) {
-                if(data.ok) {
-                    // Подставляем результаты в финальный текст на экране
+                if(data.status === 'ok') {
                     document.getElementById('res-time').innerText = timeVal;
                     document.getElementById('res-location').innerText = locVal;
                     
-                    // Переключаем экраны на сайте
                     document.getElementById('gift-form').style.display = 'none';
                     document.getElementById('screen-title').style.display = 'none';
                     document.getElementById('success-screen').style.display = 'block';
@@ -264,13 +281,10 @@
                     btn.disabled = true;
                     btn.style.opacity = "0.5";
                     btn.style.pointerEvents = "none";
-                } else {
-                    alert("Ошибка бота: " + data.description);
                 }
             })
             .catch(function(err) {
-                console.error("Ошибка сети:", err);
-                alert("Не удалось связаться с Telegram. Проверь соединение.");
+                console.error("Ошибка отправки:", err);
             });
         }
     </script>
