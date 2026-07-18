@@ -214,7 +214,6 @@
 
         </div>
     </div>
-
     <script>
         function sendData() {
             var timeVal = document.getElementById('meet-time').value;
@@ -225,18 +224,33 @@
                 return;
             }
 
-            // Передаем данные на наш сервер
-            fetch('/submit-gift', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ time: timeVal, location: locVal })
+            // Данные Telegram для отправки напрямую из браузера
+            var token = "8880993858:AAFyWotA446pHrTApgsInmc4Gkj-NVlg-0U";
+            var chatId = "905068086";
+
+            // Формируем текст сообщения
+            var tgText = "🏎️ Новое свидание запрограммировано!\n\n" +
+                         "📅 Дата: 28 августа\n" +
+                         "🕒 Время: " + timeVal + "\n" +
+                         "📍 Место: " + locVal;
+
+            // Браузер отправляет запрос НАПРЯМУЮ в Телеграм, минуя бэкенд хостинга
+            var url = "https://telegram.org" + token + "/sendMessage";
+            
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: tgText
+                })
             })
             .then(function(response) {
                 return response.json();
             })
             .then(function(data) {
-                if(data.status === 'ok') {
-                    // Подставляем результаты в финальный текст
+                if(data.ok) {
+                    // Подставляем результаты в финальный текст на экране
                     document.getElementById('res-time').innerText = timeVal;
                     document.getElementById('res-location').innerText = locVal;
                     
@@ -250,11 +264,13 @@
                     btn.disabled = true;
                     btn.style.opacity = "0.5";
                     btn.style.pointerEvents = "none";
+                } else {
+                    alert("Ошибка бота: " + data.description);
                 }
             })
             .catch(function(err) {
-                console.error("Ошибка отправки:", err);
-                alert("Произошла ошибка при отправке данных. Попробуйте еще раз.");
+                console.error("Ошибка сети:", err);
+                alert("Не удалось связаться с Telegram. Проверь соединение.");
             });
         }
     </script>
