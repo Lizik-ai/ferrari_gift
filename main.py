@@ -1,292 +1,51 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Забрать подарок</title>
-    <!-- Подключаем премиальный шрифт -->
-    <link href="https://googleapis.com" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0b0b0b;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Montserrat', sans-serif;
-            overflow: hidden;
-        }
+from flask import Flask, render_template, request, jsonify
+import requests
 
-        .phone-scaler {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transform: scale(calc(100vh / 870)); 
-            transform-origin: center;
-        }
+app = Flask(__name__)
 
-        .phone-container {
-            width: 390px;
-            height: 844px;
-            background-image: url("/static/gift_bg.png");
-            background-size: 100% 100%;
-            background-position: center;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
-            position: relative;
-            border-radius: 40px;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-        }
+# Твои официальные данные Telegram
+BOT_TOKEN = "8880993858:AAFyWotA446pHrTApgsInmc4Gkj-NVlg-0U"
+CHAT_ID = "905068086"
 
-        /* Плавные кружащиеся конфетти на весь экран */
-        @keyframes snowfall {
-            0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.7; }
-            90% { opacity: 0.7; }
-            100% { transform: translateY(850px) rotate(360deg); opacity: 0; }
-        }
-        .confetti-particle {
-            position: absolute;
-            background-color: #e5c158; 
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9;
-            animation: snowfall linear infinite;
-        }
+@app.route('/')
+def home():
+    return render_template('index.html')
 
-        .title-header {
-            position: absolute;
-            top: 150px;
-            width: 100%;
-            text-align: center;
-            color: #e5c158;
-            font-size: 16px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-weight: 500;
-        }
+@app.route('/instruction')
+def instruction():
+    return render_template('instruction.html')
 
-        .form-container {
-            position: absolute;
-            left: 35px;
-            top: 220px;
-            width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            box-sizing: border-box;
-            z-index: 15;
-        }
+@app.route('/get-gift')
+def get_gift():
+    return render_template('get_gift.html')
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+@app.route('/submit-gift', methods=['POST'])
+def submit_gift():
+    data = request.json
+    selected_time = data.get('time')
+    selected_location = data.get('location')
+    
+    # Текст сообщения
+    tg_text = f"🏎️ **Новое свидание запрограммировано!**\n\n" \
+              f"📅 **Дата:** 28 августа\n" \
+              f"🕒 **Время:** {selected_time}\n" \
+              f"📍 **Место:** {selected_location}"
+              
+    tg_url = f"https://telegram.org{BOT_TOKEN}/sendMessage"
+    
+    payload = {
+        "chat_id": CHAT_ID,
+        "text": tg_text,
+        "parse_mode": "Markdown"
+    }
+    
+    try:
+        response = requests.post(tg_url, json=payload, timeout=10)
+        print(f"Ответ Telegram: {response.text}")
+    except Exception as e:
+        print(f"Ошибка отправки в ТГ: {e}")
 
-        .input-label {
-            color: #e5c158;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding-left: 5px;
-            font-weight: 500;
-        }
+    return jsonify({'status': 'ok'})
 
-        .digital-box {
-            background: rgba(20, 20, 20, 0.75);
-            border: 1px solid rgba(229, 193, 88, 0.3);
-            border-radius: 15px;
-            padding: 12px 15px;
-            color: white;
-            font-size: 15px;
-            font-family: 'Montserrat', sans-serif;
-            outline: none;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        .digital-box:focus {
-            border-color: #e5c158;
-            box-shadow: 0 0 10px rgba(229, 193, 88, 0.2);
-        }
-
-        .time-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .time-wrapper::after {
-            content: "🕒";
-            position: absolute;
-            right: 15px;
-            font-size: 16px;
-            pointer-events: none;
-        }
-
-        /* Контейнер кнопок */
-        .buttons-container {
-            position: absolute;
-            bottom: 120px;
-            left: 25px;
-            width: 340px;
-            display: flex;
-            justify-content: space-between;
-            z-index: 20;
-        }
-
-        .gold-btn {
-            width: 155px;
-            height: 50px;
-            background: rgba(20, 20, 20, 0.6);
-            border: 1px solid #e5c158;
-            border-radius: 25px;
-            color: #e5c158;
-            font-size: 11px;
-            font-family: 'Montserrat', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-decoration: none;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        .gold-btn.dark {
-            background: rgba(229, 193, 88, 0.1);
-        }
-        .gold-btn:hover {
-            background: #e5c158;
-            color: #0b0b0b;
-            box-shadow: 0 0 20px rgba(229, 193, 88, 0.5);
-        }
-
-        .success-block {
-            position: absolute;
-            left: 35px;
-            top: 250px;
-            width: 320px;
-            background: rgba(15, 15, 15, 0.9);
-            border: 1px solid #e5c158;
-            border-radius: 25px;
-            padding: 25px;
-            color: white;
-            text-align: center;
-            display: none;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            box-sizing: border-box;
-            z-index: 15;
-        }
-        .success-block h3 { color: #e5c158; margin-top: 0; font-size: 16px; letter-spacing: 1px; }
-        .success-block p { font-size: 14px; margin: 12px 0; color: #cccccc; }
-        .success-block span { color: #e5c158; font-weight: 500; }
-    </style>
-</head>
-<body>
-
-    <div class="phone-scaler">
-        <div class="phone-container" id="main-stage">
-
-            <div class="title-header" id="screen-title">Настройка встречи</div>
-
-            <!-- Цифровая форма ввода -->
-            <div class="form-container" id="gift-form">
-                <div class="input-group">
-                    <div class="input-label">Дата встречи:</div>
-                    <div class="digital-box" style="color: #a6a6a6; background: rgba(10,10,10,0.5);">28 августа (Фиксировано) 📅</div>
-                </div>
-                
-                <div class="input-group">
-                    <div class="input-label">Укажи время:</div>
-                    <div class="time-wrapper">
-                        <input type="time" class="digital-box" id="meet-time" value="23:00" style="width: 100%;">
-                    </div>
-                </div>
-                
-                <div class="input-group">
-                    <div class="input-label">Где проведём это замечательное время?</div>
-                    <input type="text" class="digital-box" id="meet-location" placeholder="Введи локацию встречи..." autocomplete="off">
-                </div>
-            </div>
-
-            <!-- Окно успешного подтверждения -->
-            <div class="success-block" id="success-screen">
-                <h3>[ ПОДТВЕРЖДЕНО ]</h3>
-                <p>Дата: <span>28 августа</span></p>
-                <p>Время: <span id="res-time"></span></p>
-                <p>Локация: <span id="res-location"></span></p>
-                <p style="color: #e5c158; margin-top: 20px; font-style: italic; font-size: 12px;">Данные успешно отправлены Лизе. До встречи! ❤️</p>
-            </div>
-
-            <!-- Нижняя панель кнопок (Кнопка Ссылка "/" ведет на главную железно!) -->
-            <div class="buttons-container">
-                <button class="gold-btn dark" id="main-action-btn" onclick="sendData()">Подтвердить</button>
-                <a href="/" class="gold-btn">на главную</a>
-            </div>
-
-        </div>
-    </div>
-
-    <script>
-        // Генерация вечного золотого конфетти на этом экране
-        function startConfetti() {
-            var stage = document.getElementById('main-stage');
-            setInterval(function() {
-                var p = document.createElement('div');
-                p.className = 'confetti-particle';
-                var size = Math.random() * 4 + 4;
-                p.style.width = size + 'px';
-                p.style.height = size + 'px';
-                p.style.left = (Math.random() * 380) + 'px';
-                p.style.top = '-10px';
-                p.style.animationDuration = (Math.random() * 4 + 4) + 's';
-                stage.appendChild(p);
-                setTimeout(function() { p.remove(); }, 8000);
-            }, 200);
-        }
-        startConfetti();
-
-        // Отправка данных на бэкенд Python
-        function sendData() {
-            var timeVal = document.getElementById('meet-time').value;
-            var locVal = document.getElementById('meet-location').value;
-
-            if(!locVal || locVal.trim() === "") {
-                alert("Пожалуйста, укажи локацию встречи!");
-                return;
-            }
-
-            fetch('/submit-gift', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ time: timeVal, location: locVal })
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if(data.status === 'ok') {
-                    document.getElementById('res-time').innerText = timeVal;
-                    document.getElementById('res-location').innerText = locVal;
-                    
-                    document.getElementById('gift-form').style.display = 'none';
-                    document.getElementById('screen-title').style.display = 'none';
-                    document.getElementById('success-screen').style.display = 'block';
-                    
-                    var btn = document.getElementById('main-action-btn');
-                    btn.innerText = "Готово";
-                    btn.disabled = true;
-                    btn.style.opacity = "0.5";
-                    btn.style.pointerEvents = "none";
-                }
-            })
-            .catch(function(err) {
-                console.error("Ошибка отправки:", err);
-            });
-        }
-    </script>
-</body>
-</html>
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
