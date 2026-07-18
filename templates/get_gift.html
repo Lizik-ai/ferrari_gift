@@ -1,56 +1,187 @@
-from flask import Flask, render_template, request, jsonify
-import requests
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Забрать подарок</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0b0b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+        }
 
-app = Flask(__name__)
+        .phone-scaler {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: scale(calc(100vh / 870)); 
+            transform-origin: center;
+        }
 
-# Твои официальные боевые данные Telegram
-BOT_TOKEN = "8880993858:AAFyWotA446pHrTApgsInmc4Gkj-NVlg-0U"
-CHAT_ID = "905068086"
+        .phone-container {
+            width: 390px;
+            height: 844px;
+            background-image: url("/static/gift_bg.png");
+            background-size: 100% 100%;
+            background-position: center;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+            position: relative;
+            border-radius: 40px;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+        @keyframes snowfall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(850px) rotate(360deg); opacity: 0; }
+        }
+        .confetti-particle {
+            position: absolute;
+            background-color: #e5c158; 
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9;
+            animation: snowfall linear infinite;
+        }
 
-@app.route('/instruction')
-def instruction():
-    return render_template('instruction.html')
+        .title-header {
+            position: absolute;
+            top: 150px;
+            width: 100%;
+            text-align: center;
+            color: #e5c158;
+            font-size: 16px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
 
-@app.route('/get-gift')
-def get_gift():
-    return render_template('get_gift.html')
+        .form-container {
+            position: absolute;
+            left: 35px;
+            top: 220px;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-sizing: border-box;
+            z-index: 15;
+        }
 
-@app.route('/submit-gift', methods=['POST'])
-def submit_gift():
-    data = request.json
-    selected_time = data.get('time')
-    selected_location = data.get('location')
-    
-    # Текст уведомления для твоего телефона
-    tg_text = f"🏎️ **Новое свидание запрограммировано!**\n\n" \
-              f"📅 **Дата:** 28 августа\n" \
-              f"🕒 **Время:** {selected_time}\n" \
-              f"📍 **Место:** {selected_location}"
-              
-    # Идеальный, точный адрес API Telegram без ошибок склейки
-    tg_url = f"https://telegram.org{BOT_TOKEN}/sendMessage"
-    
-    payload = {
-        "chat_id": CHAT_ID,
-        "text": tg_text,
-        "parse_mode": "Markdown"
-    }
-    
-    try:
-        # Сервер Render шлёт этот запрос напрямую в Telegram, пробивая любые блокировки провайдеров
-        response = requests.post(tg_url, json=payload, timeout=10)
-        print(f"Ответ серверов Telegram: {response.text}")
-        return jsonify({'status': 'ok'})
-    except Exception as e:
-        print(f"Ошибка отправки в ТГ: {e}")
-        return jsonify({'status': 'error', 'message': str(e)})
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+        .input-label {
+            color: #e5c158;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-left: 5px;
+            font-weight: 500;
+        }
+
+        .digital-box {
+            background: rgba(20, 20, 20, 0.75);
+            border: 1px solid rgba(229, 193, 88, 0.3);
+            border-radius: 15px;
+            padding: 12px 15px;
+            color: white;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            outline: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .digital-box:focus {
+            border-color: #e5c158;
+            box-shadow: 0 0 10px rgba(229, 193, 88, 0.2);
+        }
+
+        .time-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .time-wrapper::after {
+            content: "🕒";
+            position: absolute;
+            right: 15px;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .buttons-container {
+            position: absolute;
+            bottom: 120px;
+            left: 25px;
+            width: 340px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 20;
+        }
+
+        .gold-btn {
+            width: 155px;
+            height: 50px;
+            background: rgba(20, 20, 20, 0.6);
+            border: 1px solid #e5c158;
+            border-radius: 25px;
+            color: #e5c158;
+            font-size: 11px;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .gold-btn.dark {
+            background: rgba(229, 193, 88, 0.1);
+        }
+        .gold-btn:hover {
+            background: #e5c158;
+            color: #0b0b0b;
+            box-shadow: 0 0 20px rgba(229, 193, 88, 0.5);
+        }
+
+        .success-block {
+            position: absolute;
+            left: 35px;
+            top: 250px;
+            width: 320px;
+            background: rgba(15, 15, 15, 0.9);
+            border: 1px solid #e5c158;
+            border-radius: 25px;
+            padding: 25px;
+            color: white;
+            text-align: center;
+            display: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            box-sizing: border-box;
+            z-index: 15;
+        }
+        .success-block h3 { color: #e5c158; margin-top: 0; font-size: 16px; letter-spacing: 1px; }
+        .success-block p { font-size: 14px; margin: 12px 0; color: #cccccc; }
+        .success-block span { color: #e5c158; font-weight: 500; }
+    </style>
+</head>
 <body>
 
     <div class="phone-scaler">
