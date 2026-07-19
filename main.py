@@ -71,5 +71,10 @@ def telegram_webhook():
             
     return jsonify({'status': 'ok'})
 
+@app.after_request
+def add_csp_headers(response):
+    response.headers['Content-Security-Policy'] = "default-src 'self'; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; img-src data:; connect-src https://www.google-analytics.com https://stats.g.doubleclick.net;"
+    return response
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
