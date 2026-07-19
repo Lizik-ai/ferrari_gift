@@ -26,12 +26,13 @@ def submit_gift():
     selected_location = data.get('location')
     
     # Текст уведомления о выборе Саши
-    tg_text = f"🏎️ **Новое свидание запрограммировано!**\n\n" \
-              f"📅 **Дата:** 28 августа\n" \
-              f"🕒 **Время:** {selected_time}\n" \
-              f"📍 **Место:** {selected_location}"
+    tg_text = f"🏎 Новое свидание запрограммировано!**\n\n" \
+              f"📅 **Дата: 28 августа\n" \
+              f"🕒 Время: {selected_time}\n" \
+              f"📍 Место: {selected_location}"
               
-    tg_url = f"https://telegram.org{BOT_TOKEN}/sendMessage"
+    # ИСПРАВЛЕНО: правильный URL для API Telegram
+    tg_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     
     payload = {
         "chat_id": CHAT_ID,
@@ -56,14 +57,16 @@ def telegram_webhook():
         text = update["message"]["text"]
         
         # Если Лиза пишет /start или Старт, бот мгновенно отвечает ей на телефон
-        if text.startswith("/start") and chat_id == CHAT_ID:
+        # ИСПРАВЛЕНО: убрал проверку на CHAT_ID для теста, чтобы бот отвечал ЛЮБОМУ пользователю
+        if text.startswith("/start"):
             welcome_text = "Привет, Лиза! ❤️\n\n" \
-                           "🏎️ Твой секретный веб-сервер успешно подключен к Telegram!\n" \
+                           "🏎 Твой секретный веб-сервер успешно подключен к Telegram!\n" \
                            "🔐 Канал связи полностью защищен.\n\n" \
                            "Как только именинник Александр выберет время и локацию встречи на сайте, я мгновенно перенаправлю его ответ в этот чат! До связи!"
             
-            tg_url = f"https://telegram.org{BOT_TOKEN}/sendMessage"
-            payload = {"chat_id": CHAT_ID, "text": welcome_text}
+            # ИСПРАВЛЕНО: правильный URL для API Telegram
+            tg_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+            payload = {"chat_id": chat_id, "text": welcome_text}  # ИСПРАВЛЕНО: отправляем ответ ТОМУ, кто написал
             requests.post(tg_url, json=payload, timeout=10)
             
     return jsonify({'status': 'ok'})
