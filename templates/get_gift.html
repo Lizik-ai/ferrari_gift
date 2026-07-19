@@ -251,43 +251,43 @@
 
         // АВТОНОМНАЯ ФУНКЦИЯ: Сама переключает экраны, обходя бэкенд хостинга
         function sendData() {
-    var timeVal = document.getElementById('meet-time').value;
-    var locVal = document.getElementById('meet-location').value;
+            var timeVal = document.getElementById('meet-time').value;
+            var locVal = document.getElementById('meet-location').value;
 
-    if(!locVal || locVal.trim() === "") {
-        alert("Пожалуйста, укажи локацию встречи!");
-        return;
-    }
+            if(!locVal || locVal.trim() === "") {
+                alert("Пожалуйста, укажи локацию встречи!");
+                return;
+            }
 
-    fetch('/submit-gift', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ time: timeVal, location: locVal })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.status === 'ok') {
-            document.getElementById('res-time').innerText = timeVal;
-            document.getElementById('res-location').innerText = locVal;
+            fetch('/submit-gift', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ time: timeVal, location: locVal })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'ok') {
+                    document.getElementById('res-time').innerText = timeVal;
+                    document.getElementById('res-location').innerText = locVal;
             
-            document.getElementById('gift-form').style.display = 'none';
-            document.getElementById('screen-title').style.display = 'none';
-            document.getElementById('success-screen').style.display = 'block';
+                    document.getElementById('gift-form').style.display = 'none';
+                    document.getElementById('screen-title').style.display = 'none';
+                    document.getElementById('success-screen').style.display = 'block';
             
-            var btn = document.getElementById('main-action-btn');
-            btn.innerText = "Готово";
-            btn.disabled = true;
-            btn.style.opacity = "0.5";
-            btn.style.pointerEvents = "none";
-        } else {
-            alert("Ошибка при отправке. Попробуйте ещё раз.");
+                    var btn = document.getElementById('main-action-btn');
+                    btn.innerText = "Готово";
+                    btn.disabled = true;
+                    btn.style.opacity = "0.5";
+                    btn.style.pointerEvents = "none";
+                } else {
+                    alert("Ошибка при отправке. Попробуйте ещё раз.");
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("Не удалось отправить данные. Проверьте интернет.");
+            });
         }
-    })
-    .catch(error => {
-        console.error('Ошибка:', error);
-        alert("Не удалось отправить данные. Проверьте интернет.");
-    });
-}
         function showSuccess(t, l) {
             document.getElementById('res-time').innerText = t;
             document.getElementById('res-location').innerText = l;
